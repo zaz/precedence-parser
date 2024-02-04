@@ -56,13 +56,27 @@
 (use-modules (srfi srfi-64))
 (define (test)
   (test-begin "parse-by-precedence")
+
   (test-equal (parse-by-precedence precedence commands "1+2*3-4/5^6")
              '(+ 1 (- (* 2 3) (/ 4 (expt 5 6)))))
+
   (test-equal (eval-by-precedence precedence commands "1+2*3-4/5^6")
               109371/15625)
+
   (test-equal (parse-by-precedence precedence commands "7^8/9*2-4+3")
              '(+ (- (* (/ (expt 7 8) 9) 2) 4) 3))
+
   ; using EMDAS instead of EDMSA
   (test-equal (parse-by-precedence '(#\- #\+ #\/ #\* #\^) '(- + / * expt) "4-3+2*1/5^6")
              '(- 4 (+ 3 (/ (* 2 1) (expt 5 6)))))
+
+  ; left-to-right rule for division is implemented implicitly
+  (test-equal (parse-by-precedence precedence commands "8/2/2")
+             '(/ 8 2 2))
+
+  ; TODO implement right-to-left rule for exponentiation
+  (test-expect-fail)
+  (test-equal (parse-by-precedence precedence commands "2^3^4")
+             '(^ 2 (^ 3 4)))
+
   (test-end "parse-by-precedence"))
