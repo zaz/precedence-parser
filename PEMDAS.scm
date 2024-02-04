@@ -1,18 +1,12 @@
 #!/usr/bin/guile \
 -e main -s
 !#
-; A simple parser for PEMDAS arithmetic
+; A simple parser for EDMSA arithmetic (EMDAS is a lie!)
+; Parentheses are not supported.
 
 (use-modules (ice-9 readline))
-; Use SRFI-64 testing framework.
-(use-modules (srfi srfi-64))
 
-; First, implement an EMDAS parser.
-; We will first split by ` - `, then ` + `, ` / `, and finally ` * `.
-; XXX! Splitting by ` - ` first does not seem to make sense.
-; Maybe EMDSA is more appropriate.
-
-; our tokens, in order of precedence, and the commands they map to
+; our tokens, in order of precedence (EDMSA), and the commands they map to
 (define precedence '(#\+ #\- #\* #\/ #\^))
 (define commands   '(  +   -   *   / expt))
 
@@ -43,12 +37,25 @@
     (display (eval parsed (interaction-environment)))
     (newline)))
 
+; read-eval-print loop
+(define (repl)
+  (display "Enter an arithmetic expression: ")
+  (display-parse-and-eval-by-precedence
+   precedence
+   commands
+   (remove-spaces (readline)))
+  (repl))
+
+(define (main args)
+  (if (and (not (null? (cdr args))) (equal? (car (cdr args)) "-t"))
+      (test)
+      (repl)))
+
+
+; Use SRFI-64 testing framework.
+(use-modules (srfi srfi-64))
 (define (test)
   (test-begin "parse-by-precedence")
-  (display (parse-by-precedence precedence commands "1+2*3-4/5^6"))
-  (display " = ")
-  (display (eval-by-precedence precedence commands "1+2*3-4/5^6"))
-  (newline)
   (test-equal (parse-by-precedence precedence commands "1+2*3-4/5^6")
              '(+ 1 (- (* 2 3) (/ 4 (expt 5 6)))))
   (test-equal (eval-by-precedence precedence commands "1+2*3-4/5^6")
@@ -59,11 +66,3 @@
   (test-equal (parse-by-precedence '(#\- #\+ #\/ #\* #\^) '(- + / * expt) "4-3+2*1/5^6")
              '(- 4 (+ 3 (/ (* 2 1) (expt 5 6)))))
   (test-end "parse-by-precedence"))
-
-(define (main args)
-  (if (and (not (null? (cdr args))) (equal? (car (cdr args)) "-t"))
-      (test)
-      (begin
-        (display "Enter an arithmetic expression: ")
-        (display-parse-and-eval-by-precedence precedence commands (remove-spaces (readline)))
-        (main args))))
