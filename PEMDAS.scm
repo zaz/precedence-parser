@@ -4,8 +4,6 @@
 ; A simple parser for EDMSA arithmetic (EMDAS is a lie!)
 ; Parentheses are not supported.
 
-(use-modules (ice-9 readline))
-
 ; our tokens, in order of precedence (EDMSA), and the commands they map to
 (define precedence '(#\+ #\- #\* #\/ #\^))
 (define commands   '(  +   -   *   / expt))
@@ -39,6 +37,7 @@
 
 ; read-eval-print loop
 (define (repl)
+  (use-modules (ice-9 readline))
   (display "Enter an arithmetic expression: ")
   (display-parse-and-eval-by-precedence
    precedence
