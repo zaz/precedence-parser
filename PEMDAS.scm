@@ -72,9 +72,9 @@
 ; Use SRFI-64 testing framework.
 (use-modules (srfi srfi-64))
 (define (test)
-  (test-begin "parse-by-precedence")
-
   ;; test with EDMSA precedence rules
+  (test-begin "EDMSA")
+
   (let ((precedence '(#\+ #\- #\* #\/ #\^))
         (commands   '(  +   -   *   / expt)))
 
@@ -95,10 +95,23 @@
     (test-expect-fail 1)
     (test-equal (parse-by-precedence precedence commands "2^3^4")
       '(^ 2 (^ 3 4))))
+  (test-end "EDMSA")
 
   ;; test with EMDAS precedence rules
+  (test-begin "EMDAS")
   (test-equal (parse-by-precedence '(#\- #\+ #\/ #\* #\^) '(- + / * expt) "4-3+2*1/5^6")
     '(- 4 (+ 3 (/ (* 2 1) (expt 5 6)))))
+  (test-end "EMDAS")
 
+  ;; test +, -, and unary negation
+  (test-begin "AMN")
+  (let ((precedence '(#\+ #\* #\- #\u))
+        (commands   '(  +   *   -   -)))
 
-  (test-end "parse-by-precedence"))
+    (test-equal (eval-by-precedence precedence commands "-4") -4)
+    (test-equal (eval-by-precedence precedence commands "2+3*4")  14)
+    (test-equal (eval-by-precedence precedence commands "2+3*-4") -10)
+    (test-error (parse-by-precedence precedence commands "2+3*a"))
+    (test-error (parse-by-precedence precedence commands "2+*3*4")))
+  (test-end "AMN")
+  )
