@@ -9,4 +9,4 @@ run:
 	guile -l PEMDAS.scm
 
 clean:
-	rm -f parse-by-precedence.log
+	rm -f EDMSA.log EMDAS.log AMN.log
