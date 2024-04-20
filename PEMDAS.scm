@@ -8,8 +8,9 @@
 
 ; +, *, and unary negation
 ; our tokens, in order of precedence, and the commands they map to
-(define precedence '(#\+ #\* #\-))
-(define commands   '(  +   *   -))
+; #\u indicates that we are inside a unary negation
+(define precedence '(#\+ #\* #\- #\u))
+(define commands   '(  +   *   -   -))
 
 ;; alternatively we can change this from +, *, and unary negation to an EDMSA
 ;; parser (PEMDAS is a lie!) by changing the lines above to:
@@ -23,7 +24,9 @@
 ; this is where the magic happens
 (define (parse-by-precedence precedence commands str)
   (if (string=? str "")
-      0
+      (if (eq? (car precedence) #\u)
+          0
+          (raise (string-append "Invalid expression.\n")))
       (if (null? precedence)
           (let ((num (string->number str)))
             (if num
