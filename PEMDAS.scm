@@ -54,7 +54,6 @@
 ; read-eval-print loop
 (define (repl)
   (use-modules (ice-9 readline))
-  (display "Enter an arithmetic expression: ")
   (let ((line (remove-spaces (readline))))
     (guard (err [#t (display (string-append err " " line "\n"))])
       (display-parse-and-eval-by-precedence precedence commands line)))
