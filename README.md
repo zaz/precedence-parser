@@ -23,5 +23,5 @@ make test
 or
 
 ```bash
-guile -l PEMDAS.scm -c '(test)'
+guile -l precedence-parser.scm -c '(test)'
 ```

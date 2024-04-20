@@ -3,10 +3,10 @@
 
 # default action: run tests
 test:
-	guile -l PEMDAS.scm -c '(test)'
+	guile -l precedence-parser.scm -c '(test)'
 
 run:
-	guile -l PEMDAS.scm
+	guile -l precedence-parser.scm
 
 clean:
 	rm -f EDMSA.log EMDAS.log AMN.log
