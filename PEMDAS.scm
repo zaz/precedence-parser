@@ -1,15 +1,20 @@
 #!/usr/bin/guile \
 -e main -s
 !#
-; A simple parser for EDMSA arithmetic (EMDAS is a lie!)
-; Parentheses are not supported.
+; A simple order-of-precedence parser
 
 ; exception handling
 (use-modules (srfi srfi-34))
 
-; our tokens, in order of precedence (EDMSA), and the commands they map to
-(define precedence '(#\+ #\- #\* #\/ #\^))
-(define commands   '(  +   -   *   / expt))
+; +, *, and unary negation
+; our tokens, in order of precedence, and the commands they map to
+(define precedence '(#\+ #\* #\-))
+(define commands   '(  +   *   -))
+
+;; alternatively we can change this from +, *, and unary negation to an EDMSA
+;; parser (PEMDAS is a lie!) by changing the lines above to:
+;; (define precedence '(#\+ #\- #\* #\/ #\^))
+;; (define commands   '(  +   -   *   / expt))
 
 ; helper functions
 (define (remove-spaces str)
@@ -17,19 +22,21 @@
 
 ; this is where the magic happens
 (define (parse-by-precedence precedence commands str)
-  (if (null? precedence)
-      (let ((num (string->number str)))
-       (if num
-           num
-           (raise (string-append "\"" str "\" contains lexical units which are not lexemes and, thus, is not an expression.\n"))))
-      (let ((subtree
-             (map
-              (lambda (substr)
-                (parse-by-precedence (cdr precedence) (cdr commands) substr))
-              (string-split str (car precedence)))))
-        (if (null? (cdr subtree))
-            (car subtree)
-            (cons (car commands) subtree)))))
+  (if (string=? str "")
+      0
+      (if (null? precedence)
+          (let ((num (string->number str)))
+            (if num
+                num
+                (raise (string-append "\"" str "\" is not a lexeme.\n"))))
+          (let ((subtree
+                 (map
+                  (lambda (substr)
+                    (parse-by-precedence (cdr precedence) (cdr commands) substr))
+                  (string-split str (car precedence)))))
+            (if (null? (cdr subtree))
+                (car subtree)
+                (cons (car commands) subtree))))))
 
 (define (eval-by-precedence precedence commands str)
   (eval (parse-by-precedence precedence commands str) (interaction-environment)))
