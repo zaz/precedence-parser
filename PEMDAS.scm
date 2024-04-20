@@ -4,6 +4,9 @@
 ; A simple parser for EDMSA arithmetic (EMDAS is a lie!)
 ; Parentheses are not supported.
 
+; exception handling
+(use-modules (srfi srfi-34))
+
 ; our tokens, in order of precedence (EDMSA), and the commands they map to
 (define precedence '(#\+ #\- #\* #\/ #\^))
 (define commands   '(  +   -   *   / expt))
@@ -15,7 +18,10 @@
 ; this is where the magic happens
 (define (parse-by-precedence precedence commands str)
   (if (null? precedence)
-      (string->number str)
+      (let ((num (string->number str)))
+       (if num
+           num
+           (raise (string-append "\"" str "\" contains lexical units which are not lexemes and, thus, is not an expression.\n"))))
       (let ((subtree
              (map
               (lambda (substr)
@@ -39,10 +45,12 @@
 (define (repl)
   (use-modules (ice-9 readline))
   (display "Enter an arithmetic expression: ")
-  (display-parse-and-eval-by-precedence
-   precedence
-   commands
-   (remove-spaces (readline)))
+  (guard (err [#t (display err)])
+    (display-parse-and-eval-by-precedence
+     precedence
+     commands
+     (remove-spaces (readline)))
+    )
   (repl))
 
 (define (main args)
