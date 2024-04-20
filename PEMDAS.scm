@@ -26,12 +26,12 @@
   (if (string=? str "")
       (if (eq? (car precedence) #\u)
           0
-          (raise (string-append "Invalid expression.\n")))
+          (raise (string-append "Invalid expression:")))
       (if (null? precedence)
           (let ((num (string->number str)))
             (if num
                 num
-                (raise (string-append "\"" str "\" is not a lexeme.\n"))))
+                (raise (string-append "\"" str "\" is not a lexeme, so this is an invalid expression:"))))
           (let ((subtree
                  (map
                   (lambda (substr)
@@ -55,12 +55,9 @@
 (define (repl)
   (use-modules (ice-9 readline))
   (display "Enter an arithmetic expression: ")
-  (guard (err [#t (display err)])
-    (display-parse-and-eval-by-precedence
-     precedence
-     commands
-     (remove-spaces (readline)))
-    )
+  (let ((line (remove-spaces (readline))))
+    (guard (err [#t (display (string-append err " " line "\n"))])
+      (display-parse-and-eval-by-precedence precedence commands line)))
   (repl))
 
 (define (main args)
