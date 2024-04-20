@@ -31,7 +31,8 @@
           (let ((num (string->number str)))
             (if num
                 num
-                (raise (string-append "\"" str "\" is not a lexeme, so this is an invalid expression:"))))
+                (raise (string-append "\"" str "\" is not a lexeme, so this is "
+                                      " an invalid expression:"))))
           (let ((subtree
                  (map
                   (lambda (substr)
@@ -74,29 +75,35 @@
   (let ((precedence '(#\+ #\- #\* #\/ #\^))
         (commands   '(  +   -   *   / expt)))
 
-    (test-equal (parse-by-precedence precedence commands "1+2*3-4/5^6")
-      '(+ 1 (- (* 2 3) (/ 4 (expt 5 6)))))
+    (test-equal
+      '(+ 1 (- (* 2 3) (/ 4 (expt 5 6))))
+      (parse-by-precedence precedence commands "1+2*3-4/5^6"))
 
-    (test-equal (eval-by-precedence precedence commands "1+2*3-4/5^6")
-      109371/15625)
+    (test-equal
+      109371/15625
+      (eval-by-precedence precedence commands "1+2*3-4/5^6"))
 
-    (test-equal (parse-by-precedence precedence commands "7^8/9*2-4+3")
-      '(+ (- (* (/ (expt 7 8) 9) 2) 4) 3))
+    (test-equal
+      '(+ (- (* (/ (expt 7 8) 9) 2) 4) 3)
+      (parse-by-precedence precedence commands "7^8/9*2-4+3"))
 
     ;; left-to-right rule for division is implemented implicitly
-    (test-equal (parse-by-precedence precedence commands "8/2/2")
-      '(/ 8 2 2))
+    (test-equal
+      '(/ 8 2 2)
+      (parse-by-precedence precedence commands "8/2/2"))
 
     ;; TODO implement right-to-left rule for exponentiation
     (test-expect-fail 1)
-    (test-equal (parse-by-precedence precedence commands "2^3^4")
-      '(^ 2 (^ 3 4))))
+    (test-equal
+      '(^ 2 (^ 3 4))
+      (parse-by-precedence precedence commands "2^3^4")))
   (test-end "EDMSA")
 
   ;; test with EMDAS precedence rules
   (test-begin "EMDAS")
-  (test-equal (parse-by-precedence '(#\- #\+ #\/ #\* #\^) '(- + / * expt) "4-3+2*1/5^6")
-    '(- 4 (+ 3 (/ (* 2 1) (expt 5 6)))))
+  (test-equal
+    '(- 4 (+ 3 (/ (* 2 1) (expt 5 6))))
+    (parse-by-precedence '(#\- #\+ #\/ #\* #\^) '(- + / * expt) "4-3+2*1/5^6"))
   (test-end "EMDAS")
 
   ;; test +, -, and unary negation
@@ -104,10 +111,10 @@
   (let ((precedence '(#\+ #\* #\- #\u))
         (commands   '(  +   *   -   -)))
 
-    (test-equal (eval-by-precedence precedence commands "-4") -4)
-    (test-equal (eval-by-precedence precedence commands "2+3*4")  14)
-    (test-equal (eval-by-precedence precedence commands "2+3*-4") -10)
-    (test-error (parse-by-precedence precedence commands "2+3*a"))
-    (test-error (parse-by-precedence precedence commands "2+*3*4")))
+    (test-equal  -4 (eval-by-precedence precedence commands "-4"))
+    (test-equal  14 (eval-by-precedence precedence commands "2+3*4"))
+    (test-equal -10 (eval-by-precedence precedence commands "2+3*-4"))
+    (test-error    (parse-by-precedence precedence commands "2+3*a"))
+    (test-error    (parse-by-precedence precedence commands "2+*3*4")))
   (test-end "AMN")
   )
