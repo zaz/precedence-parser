@@ -11,3 +11,17 @@ Instead of the correct version:
 $$ 2 × 3 / 4 × 5 = 2 × ( 3 / 4) × 5 $$
 
 So the correct order of precedence is actually PEDMSA along with a left-to-right rule on division and a right-to-left rule on exponentiation.
+
+## Testing
+
+You can run tests using
+
+```bash
+make test
+```
+
+or
+
+```bash
+guile -l PEMDAS.scm -c '(test)'
+```
